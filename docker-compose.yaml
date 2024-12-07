@@ -1,0 +1,79 @@
+services:
+  comfyui:
+    # Need to build image manually first - ( docker build --no-cache -t comfyui:custom . ) OR uncomment below and comment out the (image: comfyui:custom)
+    # build:
+    #   context: .
+    image: comfyui:custom
+    container_name: comfyui
+    user: root
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    networks:
+      - traefik-public
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./data:/home/user/app/data
+      - ./models:/home/user/app/models
+      - ./code:/home/user/app/code
+      - ./custom_nodes:/home/user/app/custom_nodes
+      - ./output:/home/user/app/output
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-public"
+      - "traefik.http.routers.comfyui.rule=Host(`comfyui.example.com`)"
+      - "traefik.http.services.comfyui.loadbalancer.server.port=7860"
+      - "traefik.http.routers.comfyui.entrypoints=websecure"
+      - "traefik.http.routers.comfyui.tls=true"
+      - "traefik.http.routers.comfyui.tls.certresolver=leresolver"
+traefik:
+    image: "traefik:latest"
+    restart: unless-stopped
+    command:
+      - --log.level=DEBUG
+      - --accesslog
+      - --log.level=INFO
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.forwardedHeaders.insecure=true
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.forwardedHeaders.insecure=true
+      - --providers.docker
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik-public
+      - --accesslog.filepath=/etc/traefik/access.log
+      - --api
+      - --api.dashboard=true
+      - --certificatesresolvers.leresolver.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.leresolver.acme.email=user@example.com
+      # Make sure acme.json is available and permission is set correctly
+      - --certificatesresolvers.leresolver.acme.storage=/acme/acme.json
+      - --certificatesresolvers.leresolver.acme.tlschallenge=true
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - traefik-public
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "acme:/acme"
+      - "/traefik/acme.json:/acme/acme.json"
+      
+networks:
+  traefik-public:
+    #enable_ipv6: true
+    driver: bridge
+    name: traefik-public
+
+volumes:
+  acme:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /traefik
