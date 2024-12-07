@@ -9,6 +9,9 @@ Make your folders for the docker volumes (data, models, code, custom_nodes, outp
 Build the image -
 `docker build --no-cache -t comfyui:custom .`
 
+Run the download_comfyui-manager.sh file -
+`download_comfyui-manager.sh`
+
 Change the website address in the compose.
 "traefik.http.routers.comfyui.rule=Host(`comfyui.example.com`)"
 
