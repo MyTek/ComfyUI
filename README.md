@@ -3,4 +3,19 @@ Install ComfyUI with Traefik and host externally
 
 This was pulled and revamped from https://github.com/krasamo/comfyui-docker
 
-Build the image.  Change the website.  Run the compose.  Check the output directory for generated images.  Enjoy.
+Make your folders for the docker volumes (data, models, code, custom_nodes, output).
+`mkdir data models code custom_nodes output`
+
+Build the image -
+`docker build --no-cache -t comfyui:custom .`
+
+Change the website address in the compose.
+"traefik.http.routers.comfyui.rule=Host(`comfyui.example.com`)"
+
+Run the compose.
+`docker compose up -d`
+
+Check the output directory for generated images.
+`./output`
+
+Enjoy.
