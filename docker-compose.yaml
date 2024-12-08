@@ -24,6 +24,7 @@ services:
       - ./code:/home/user/app/code
       - ./custom_nodes:/home/user/app/custom_nodes
       - ./output:/home/user/app/output
+      - ./workflows:/home/user/app/user/default/workflows
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=traefik-public"
