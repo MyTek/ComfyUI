@@ -23,6 +23,7 @@ services:
       - ./models:/home/user/app/models
       - ./code:/home/user/app/code
       - ./custom_nodes:/home/user/app/custom_nodes
+      - ./input:/home/user/app/input
       - ./output:/home/user/app/output
       - ./workflows:/home/user/app/user/default/workflows
     labels:
